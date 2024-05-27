@@ -1,0 +1,48 @@
+version: "3.8"
+
+services:
+  wp_mariadb:
+    image: mariadb:latest
+    volumes:
+      - wp_dbvolume:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: strenggeheim
+      MYSQL_DATABASE: wp
+      MYSQL_USER: wpuser
+      MYSQL_PASSWORD: geheim
+    networks:
+      - wp_net
+
+  wp_pma:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: wp_mariadb
+    ports:
+      - "8080:80"
+    networks:
+      - wp_net
+
+  wp_wordpress:
+    image: wordpress
+    volumes:
+      - wp_htmlvolume:/var/www/html/wp-content
+    environment:
+      WORDPRESS_DB_HOST: wp_mariadb
+      WORDPRESS_DB_USER: wpuser 
+      WORDPRESS_DB_NAME: wp 
+      WORDPRESS_DB_PASSWORD: geheim 
+    ports:
+      - "8081:80"
+    networks:
+      - wp_net
+
+volumes:
+  wp_dbvolume:
+  wp_htmlvolume:
+  
+networks:
+  wp_net: 
+    ipam:
+      config:
+        - subnet: 192.168.200.0/24 
+          gateway: 192.168.200.1
